@@ -9,6 +9,7 @@ use Core\Route;
 
 // require_once('../vendor/autoload.php');
 require_once __DIR__ . '/../vendor/autoload.php';
+$app = require_once __DIR__ . '/../bootstrap/app.php';
 
 // $request = $_SERVER['REQUEST_URI'];
 // 1. URL එක පිරිසිදු කර ගැනීම (Query String අයින් කිරීම)
