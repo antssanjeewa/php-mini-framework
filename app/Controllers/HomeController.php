@@ -6,6 +6,6 @@ class HomeController
 {
   public function index()
   {
-    return "<h1>Home Page</h1>";
+    return view('home', ["username" => "Admin"]);
   }
 }
