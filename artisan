@@ -1,0 +1,48 @@
+#!/usr/bin/php
+<?php
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+use Core\Database;
+
+$command = $argv[1] ?? null;
+
+if ($command === 'migrate') {
+  echo "🚀 Migration Start...";
+  $config = require __DIR__ . '/config/database.php';
+
+  try {
+    $db = Database::connect();
+  } catch (\Exception $e) {
+    if (strpos($e->getMessage(), '[1049] Unknown database') !== false) {
+
+      echo "\n⚠️  '{$config['dbname']}' කියන Database එක සොයාගත නොහැක.\n";
+      $input = readline("❓ ඔබට මෙම Database එක අලුතෙන් නිර්මාණය කිරීමට අවශ්‍යද? (yes/no) [no]: ");
+
+      if (strtolower(trim($input)) === 'yes') {
+        echo "🔨 Database එක නිර්මාණය කරමින්...\n";
+
+        // Config එකේ දත්ත පාවිච්චි කර සර්වර් එකට සම්බන්ධ වීම
+        $serverConn = new \PDO("mysql:host={$config['host']}", $config['username'], $config['password']);
+        $serverConn->exec("CREATE DATABASE `{$config['dbname']}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
+
+        echo "✅ Database එක සාර්ථකව නිර්මාණය වුණා!\n";
+        $db = Database::connect();
+      } else {
+        echo "❌ Migration ක්‍රියාවලිය නවතා දැමුවා.\n";
+        exit(1);
+      }
+    } else {
+      echo "❌ " . $e->getMessage() . "\n";
+      exit(1);
+    }
+  }
+
+  try {
+    $sql = "CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100) NOT NULL, email VARCHAR(100) NOT NULL);";
+    $db->exec($sql);
+    echo "✅ සියලුම Tables සාර්ථකව එකතු වුණා!\n";
+  } catch (\Exception $e) {
+    echo "❌ Tables Error: " . $e->getMessage() . "\n";
+  }
+}

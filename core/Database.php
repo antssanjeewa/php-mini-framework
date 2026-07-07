@@ -15,14 +15,10 @@ class Database
   public static function connect(): PDO
   {
     if (self::$instance === null) {
-      // ඔබේ Database විස්තර මෙතන ඇතුළත් කරන්න
-      $host = '127.0.0.1';
-      $db = 'mini_framework';
-      $user = 'root';      // ඔබේ MySQL Username එක
-      $pass = 'root';          // ඔබේ MySQL Password එක
-      $charset = 'utf8mb4';
 
-      $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+      $config = require __DIR__ . '/../config/database.php';
+
+      $dsn = "mysql:host={$config['host']};dbname={$config['dbname']};charset={$config['charset']}";
 
       // PDO සඳහා අමතර Settings (Error Handling සහ Fetch Mode)
       $options = [
@@ -32,7 +28,7 @@ class Database
       ];
 
       try {
-        self::$instance = new PDO($dsn, $user, $pass, $options);
+        self::$instance = new PDO($dsn, $config['username'], $config['password'], $options);
       } catch (PDOException $e) {
         throw new Exception("Database Connection Error 🔌: " . $e->getMessage());
       }
