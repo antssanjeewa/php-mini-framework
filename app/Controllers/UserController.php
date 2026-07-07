@@ -20,14 +20,6 @@ class UserController
 
   public function store()
   {
-    $formToken = $_POST['csrf_token'] ?? null;
-    $sessionToken = $_SESSION['csrf_token'] ?? null;
-
-    if (!$formToken || $formToken !== $sessionToken) {
-      http_response_code(419); // 419 Page Expired (Laravel Standard)
-      throw new \Exception("419 | CSRF Token Mismatch!");
-    }
-
     $name = $_POST['name'] ?? null;
     $email = $_POST['email'] ?? null;
 

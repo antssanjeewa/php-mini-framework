@@ -35,6 +35,15 @@ class Router
         array_shift($matches); // පළමු අගය ඉවත් කරයි
         $arguments = $matches; // දැන් මෙහි [5] වැනි අගයන් පවතී
 
+        // Route එකට අදාළව Middleware එකක් තිබේදැයි බැලීම
+        if ($method === 'POST') {
+          $middlewareClass = \Core\Middleware\MiddlewareMap::find('csrf');
+          if ($middlewareClass) {
+            $middlewareInstance = new $middlewareClass();
+            $middlewareInstance->handle(); // 🛡️ මුලින්ම ආරක්ෂක වැට ක්‍රියාත්මක වේ!
+          }
+        }
+
         // 2. Action එක Array එකක් නම් (Controller Handling)
         if (is_array($action)) {
           if (count($action) < 2) {
