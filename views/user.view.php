@@ -6,6 +6,9 @@
 <form action="/user/save"
   method="POST"
   style="max-width: 400px;">
+
+  <?php echo csrf_field(); ?>
+
   <div style="margin-bottom: 15px;">
     <label for="name"
       style="display: block; margin-bottom: 5px;">User Name:</label>

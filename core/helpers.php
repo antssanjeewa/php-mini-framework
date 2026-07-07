@@ -1,5 +1,9 @@
 <?php
 
+if (session_status() === PHP_SESSION_NONE) {
+  session_start();
+}
+
 if (!function_exists('view')) {
   /**
    * View ෆයිල් එකක් Render කිරීම සහ දත්ත පාස් කිරීම.
@@ -29,5 +33,24 @@ if (!function_exists('view')) {
 
     // {{content}} වෙනුවට සැබෑ පිටුවේ HTML එක දමා Output කිරීම
     return str_replace('{{content}}', $viewContent, $layoutContent);
+  }
+}
+
+// 💡 CSRF Token එකක් සෑදීම හෝ පවතින එක ලබාදීම
+if (!function_exists('csrf_token')) {
+  function csrf_token()
+  {
+    if (!isset($_SESSION['csrf_token'])) {
+      $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+  }
+}
+
+// 💡 Form එක ඇතුළේ ලියන්න සරල HTML එකක් දීම
+if (!function_exists('csrf_field')) {
+  function csrf_field()
+  {
+    return '<input type="hidden" name="csrf_token" value="' . csrf_token() . '">';
   }
 }
