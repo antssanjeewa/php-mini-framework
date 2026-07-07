@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Models\User;
+
 class UserController
 {
   public function index()
@@ -11,6 +13,8 @@ class UserController
 
   public function show($id)
   {
+    $user = User::find($id);
+
     return view('user', ['id' => $id]);
   }
 }
