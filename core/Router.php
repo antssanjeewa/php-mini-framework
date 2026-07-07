@@ -59,6 +59,6 @@ class Router
 
     // කිසිම රූට් එකක් මැච් වුණේ නැත්නම් 404
     http_response_code(404);
-    return "<h1>404 Not Found (via Advanced Router)</h1>";
+    return view('errors/404');
   }
 }

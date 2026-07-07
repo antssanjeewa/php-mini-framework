@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="si">
+
+<head>
+  <meta charset="UTF-8">
+  <title>My Mini Framework</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+    }
+
+    nav {
+      background: #333;
+      padding: 15px;
+      color: white;
+    }
+
+    nav a {
+      color: white;
+      margin-right: 15px;
+      text-decoration: none;
+    }
+
+    .container {
+      padding: 20px;
+      background: white;
+      margin: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      background: #ddd;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    <a href="/">Home</a> |
+    <a href="/about">About</a> |
+    <a href="/user">User</a> |
+    <a href="/user/1">Profile (User 1)</a>
+  </nav>
+
+  <div class="container">
+    {{content}}
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Mini Framework. All rights reserved.</p>
+  </footer>
+
+</body>
+
+</html>
