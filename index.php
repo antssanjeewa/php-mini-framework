@@ -6,6 +6,25 @@ echo "<nav><a href='/'>Home</a> | <a href='/about'>About</a> | <a href='/notfoun
 $request = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 // -----------------------------------------
+// 1. CONTROLLER CLASSES (Logic වෙන් කිරීම)
+// -----------------------------------------
+class HomeController
+{
+  public function index()
+  {
+    return "<h1>Home Page (via HomeController)</h1>";
+  }
+}
+
+class AboutController
+{
+  public function index()
+  {
+    return "<h1>About Us Page (via AboutController)</h1>";
+  }
+}
+
+// -----------------------------------------
 // 1. ROUTER CLASS එක (Router එකේ වගකීම)
 // -----------------------------------------
 class Router
@@ -14,7 +33,7 @@ class Router
   private array $routes = [];
 
   // Route එකක් පද්ධතියට එකතු කරන Method එක
-  public function add(string $uri, callable $callback)
+  public function add(string $uri, $callback)
   {
     $this->routes[$uri] = $callback;
   }
@@ -24,6 +43,22 @@ class Router
   {
     if (array_key_exists($requestUri, $this->routes)) {
       $action = $this->routes[$requestUri];
+
+      // 💡 ගැටලුව විසඳීම: $action එක array එකක්ද කියා බැලීම
+      if (is_array($action)) {
+        // $action[0] කියන්නේ Class එක (උදා: HomeController)
+        // $action[1] කියන්නේ Method එක (උදා: 'index')
+        $controllerNode = $action[0];
+        $method = $action[1];
+
+        // Class එකෙන් Object එකක් dynamic ලෙස සෑදීම (new HomeController())
+        $controllerInstance = new $controllerNode();
+
+        // Object එක ඇතුළේ තියෙන method එක run කිරීම ($controllerInstance->index())
+        return $controllerInstance->$method();
+      }
+
+      // Closure එකක් නම් කලින් වගේම run කරනවා
       return $action();
     }
 
@@ -35,14 +70,8 @@ class Router
 // Router එකෙන් Object එකක් හදාගන්නවා
 $router = new Router();
 
-// Laravel වල වගේ ලස්සනට Routes එකතු කරනවා
-$router->add('/', function () {
-  return "<h1>Home Page</h1>";
-});
-
-$router->add('/about', function () {
-  return "<h1>About Us Page</h1>";
-});
+$router->add('/', [HomeController::class, 'index']);
+$router->add('/about', [AboutController::class, 'index']);
 
 // අවසානයේ Request එක බාරදී ක්‍රියාත්මක කරවනවා
 echo $router->resolve($request);
