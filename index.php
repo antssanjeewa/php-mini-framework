@@ -5,28 +5,44 @@ echo "<nav><a href='/'>Home</a> | <a href='/about'>About</a> | <a href='/notfoun
 
 $request = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-// --- ROUTER & LOGIC ---
-// අපි වෙනම තිබුණු ෆන්ක්ෂන්ස් අයින් කරලා, කෙලින්ම Array එක ඇතුළෙම ඒවා ලිව්වා.
-$routes = [
-  '/' => function () {
-    return "<h1>Home Page</h1>";
-  },
-  '/about' => function () {
-    return "<h1>About Us Page</h1>";
+// -----------------------------------------
+// 1. ROUTER CLASS එක (Router එකේ වගකීම)
+// -----------------------------------------
+class Router
+{
+  // Routes ටික රහසිගතව තබා ගන්නා Array එක
+  private array $routes = [];
+
+  // Route එකක් පද්ධතියට එකතු කරන Method එක
+  public function add(string $uri, callable $callback)
+  {
+    $this->routes[$uri] = $callback;
   }
-];
 
-// 404 සඳහාත් නමක් නැති ෆන්ක්ෂන් එකක් Variable එකකට ගනිමු
-$notFound = function () {
-  http_response_code(404);
-  return "<h1>404 Not Found</h1>";
-};
+  // පැමිණි Request එක පරීක්ෂා කර ක්‍රියාත්මක කරන Method එක
+  public function resolve(string $requestUri)
+  {
+    if (array_key_exists($requestUri, $this->routes)) {
+      $action = $this->routes[$requestUri];
+      return $action();
+    }
 
-// Route එක පරීක්ෂා කර ක්‍රියාත්මක කිරීම
-if (array_key_exists($request, $routes)) {
-  // දැන් $routes[$request] එකෙන් ලැබෙන්නේ executable function එකක් (Closure)
-  $action = $routes[$request];
-  echo $action();
-} else {
-  echo $notFound();
+    http_response_code(404);
+    return "<h1>404 Not Found (via Router Class)</h1>";
+  }
 }
+
+// Router එකෙන් Object එකක් හදාගන්නවා
+$router = new Router();
+
+// Laravel වල වගේ ලස්සනට Routes එකතු කරනවා
+$router->add('/', function () {
+  return "<h1>Home Page</h1>";
+});
+
+$router->add('/about', function () {
+  return "<h1>About Us Page</h1>";
+});
+
+// අවසානයේ Request එක බාරදී ක්‍රියාත්මක කරවනවා
+echo $router->resolve($request);
