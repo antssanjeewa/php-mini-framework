@@ -2,25 +2,31 @@
 
 echo "<h1>Welcome to My Mini Framework!</h1>";
 
-$request = $_SERVER['REQUEST_URI'];
+$request_uri = $_SERVER['REQUEST_URI'];
+$base_path = parse_url($request_uri, PHP_URL_PATH);
+$request = rtrim($base_path, '/');
 
-// සරල Router එකක් ක්‍රියාත්මක කිරීම
-switch ($request) {
-  case '/':
-  case '':
-    echo "<h1>Home Page</h1>";
-    break;
+// --- CONTROLLERS ---
+function homeController()
+{
+  return "<h1>Home Page</h1><p>Welcome to Valet powered Mini Framework!</p>";
+}
 
-  case '/about':
-    echo "<h1>About Us Page</h1>";
-    break;
+function aboutController()
+{
+  return "<h1>About Us</h1><p>Running smoothly on Nginx.</p>";
+}
 
-  case '/contact':
-    echo "<h1>Contact Page</h1>";
-    break;
+// --- ROUTER ---
+$routes = [
+  '' => 'homeController',
+  '/about' => 'aboutController'
+];
 
-  default:
-    http_response_code(404);
-    echo "<h1>404 Not Found</h1>";
-    break;
+if (array_key_exists($request, $routes)) {
+  $action = $routes[$request];
+  echo $action();
+} else {
+  http_response_code(404);
+  echo "<h1>404 - Page Not Found (Valet)</h1>";
 }
