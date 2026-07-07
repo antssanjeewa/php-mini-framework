@@ -9,7 +9,7 @@
       font-family: sans-serif;
       margin: 0;
       padding: 0;
-      background: #f4f4f4;
+      background: #2b2b2b;
     }
 
     nav {
@@ -26,7 +26,8 @@
 
     .container {
       padding: 20px;
-      background: white;
+      color: white;
+      background: #141414;
       margin: 20px;
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -35,7 +36,8 @@
     footer {
       text-align: center;
       padding: 15px;
-      background: #ddd;
+      background: #141414;
+      color: white;
       position: fixed;
       bottom: 0;
       width: 100%;

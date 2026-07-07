@@ -4,17 +4,23 @@ namespace Core;
 
 class Router
 {
-  private array $routes = [];
+  private array $routes = [
+    'GET' => [],
+    'POST' => []
+  ];
 
-  public function add(string $uri, $callback)
+  public function add(string $method, string $uri, $callback)
   {
-    $this->routes[$uri] = $callback;
+    $this->routes[strtoupper($method)][$uri] = $callback;
   }
 
-  public function resolve(string $requestUri)
+  public function resolve(string $requestUri, string $requestMethod)
   {
+    $method = strtoupper($requestMethod);
+    $routesToScan = $this->routes[$method] ?? [];
+
     // 1. හැම රූට් එකක්ම පරීක්ෂා කිරීම සඳහා ලූප් එකක් භාවිතා කරයි
-    foreach ($this->routes as $route => $action) {
+    foreach ($routesToScan as $route => $action) {
 
       // සාමාන්‍ය රූට් එකක් Regex රටාවකට හැරවීම
       // උදා: '/user/{id}' -> '/^\/user\/([0-9]+)$/'
