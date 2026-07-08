@@ -22,7 +22,7 @@ try {
 
   $response = $kernel->handle(request());
 
-  echo $response;
+  $response->send();
 
 } catch (Exception $e) {
   ExceptionHandler::handle($e);

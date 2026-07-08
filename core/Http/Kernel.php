@@ -15,6 +15,6 @@ class Kernel
 
     $response = $router->resolve($request);
 
-    return $response;
+    return new Response($response);
   }
 }
