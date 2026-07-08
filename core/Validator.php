@@ -21,24 +21,10 @@ class Validator
 
         $input = $inputs[$key] ?? null;
 
-        if ($rule === 'required' && empty($input)) {
-          $this->addError($key, "{$key} එක අනිවාර්ය වේ!");
-        }
+        $methodName = 'validate' . ucfirst($rule);
 
-        if ($rule === 'string' && is_string($input)) {
-          $this->addError($key, "{$key} must be string!");
-        }
-
-        if ($rule === 'max' && strlen($input) > $ruleValue) {
-          $this->addError($key, "{$key} exceep max length!");
-        }
-
-        if ($rule === 'email' && !empty($input) && !filter_var($input, FILTER_VALIDATE_EMAIL)) {
-          $this->addError($key, "වලංගු Email ලිපිනයක් ඇතුළත් කරන්න!");
-        }
-
-        if ($rule === 'min' && !empty($input) && strlen($input) < $ruleValue) {
-          $this->addError($key, "{$key} එකට අවම වශයෙන් අකුරු {$ruleValue} ක් අවශ්‍යයි!");
+        if (method_exists($this, $methodName)) {
+          $this->$methodName($key, $input, $ruleValue);
         }
       }
     }
@@ -54,5 +40,41 @@ class Validator
   private function addError($key, $message)
   {
     $this->errors[$key][] = $message;
+  }
+
+  private function validateRequired($field, $value)
+  {
+    if (empty($value)) {
+      $this->addError($field, "{$field} එක අනිවාර්ය වේ!");
+    }
+  }
+
+  private function validateString($field, $value)
+  {
+    if (is_string($value)) {
+      $this->addError($field, "{$field} must be string!");
+    }
+  }
+
+  private function validateMax($field, $value, $ruleValue)
+  {
+    if (strlen($value) > $ruleValue) {
+      $this->addError($field, "{$field} exceep max length!");
+    }
+  }
+
+  private function validateEmail($field, $value)
+  {
+    if (!empty($value) && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+      $this->addError($field, "වලංගු Email ලිපිනයක් ඇතුළත් කරන්න!");
+    }
+
+  }
+
+  private function validateMin($field, $value, $ruleValue)
+  {
+    if (!empty($value) && strlen($value) < $ruleValue) {
+      $this->addError($field, "{$field} එකට අවම වශයෙන් අකුරු {$ruleValue} ක් අවශ්‍යයි!");
+    }
   }
 }
