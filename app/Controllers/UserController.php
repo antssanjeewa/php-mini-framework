@@ -3,20 +3,21 @@
 namespace App\Controllers;
 
 use App\Models\User;
+use Core\Controller;
 use Core\Request;
 
-class UserController
+class UserController extends Controller
 {
   public function index()
   {
-    return view('user');
+    return $this->view('user');
   }
 
   public function show(Request $request, $id)
   {
     $user = User::find($id);
 
-    return view('user', ['id' => $id]);
+    return $this->view('user', ['id' => $id]);
   }
 
   public function store(Request $request)
@@ -28,6 +29,6 @@ class UserController
 
     User::store($request->input('name'), $request->input('email'));
 
-    go_back();
+    return $this->redirect();
   }
 }
