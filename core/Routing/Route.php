@@ -1,6 +1,8 @@
 <?php
 namespace Core\Routing;
 
+use Core\App;
+
 class Route
 {
   private static ?Router $routerInstance = null;
@@ -8,7 +10,7 @@ class Route
   private static function getRouter(): Router
   {
     if (self::$routerInstance === null) {
-      self::$routerInstance = new Router();
+      self::$routerInstance = App::get(Router::class);
     }
     return self::$routerInstance;
   }
