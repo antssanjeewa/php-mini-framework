@@ -1,18 +1,16 @@
 <?php
 
+use App\Providers\DatabaseServiceProvider;
 use Core\App;
 use Core\Container;
-use Core\Database\Database;
 use Core\Http\Request;
 
 $container = new Container();
+App::setContainer($container);
 
-$container->singleton('db', function () {
-  return Database::connect();
-});
-
-$container->singleton(Request::class, function () {
+App::singleton(Request::class, function () {
   return new Request();
 });
 
-App::setContainer($container);
+$dbProvider = new DatabaseServiceProvider();
+$dbProvider->register();

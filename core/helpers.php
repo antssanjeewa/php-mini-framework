@@ -90,6 +90,13 @@ if (!function_exists('go_back')) {
   }
 }
 
+if (!function_exists('base_path')) {
+  function base_path(string $path)
+  {
+    return BASE_PATH . $path;
+  }
+}
+
 if (!function_exists('request')) {
   function request()
   {

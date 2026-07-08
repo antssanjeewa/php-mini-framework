@@ -8,17 +8,17 @@ class Controller
   {
     extract($data);
     ob_start();
-    $viewFile = dirname(__DIR__) . "/views/{$viewName}.view.php";
+    $viewFile = dirname(__DIR__) . "/../views/{$viewName}.view.php";
 
     if (file_exists($viewFile)) {
       require $viewFile;
     } else {
-      require dirname(__DIR__) . "/views/errors/404.view.php";
+      require dirname(__DIR__) . "/../views/errors/404.view.php";
     }
     $viewContent = ob_get_clean();
 
     ob_start();
-    require dirname(__DIR__) . "/views/layouts/main.view.php";
+    require dirname(__DIR__) . "/../views/layouts/main.view.php";
     $layoutContent = ob_get_clean();
 
     return str_replace('{{content}}', $viewContent, $layoutContent);

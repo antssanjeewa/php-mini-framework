@@ -1,29 +1,85 @@
-# Custom PHP Mini-Framework 🚀
+# PHP Mini Framework
 
-මෙය Laravel Framework එකෙහි මූලික ආකෘතිය (Core Architecture) පදනම් කර ගනිමින් PHP මඟින් නිර්මාණය කරන ලද සරල එහෙත් ඉතාමත් බලගතු MVC වෙබ් ෆ්‍රේම්වර්ක් එකකි. මෙහි Service Container, Dependency Injection, Middleware, Custom CLI (Artisan) සහ CSRF Protection වැනි ප්‍රධාන සංකල්ප අන්තර්ගත වේ.
+A small, opinionated MVC PHP framework inspired by Laravel's core architecture. It provides a lightweight set of building blocks for learning and simple projects: a service container, dependency injection, middleware support, a tiny router, view helpers, and a basic CLI (`artisan`).
+
+Key features:
+- Service Container & Dependency Injection
+- Middleware pipeline and CSRF protection
+- Simple routing and controllers
+- PDO-based database helper
+- Small, readable codebase for learning and prototyping
+
+Requirements
+- PHP 7.4+ with PDO extension
+
+Quick start
+1. Clone the repository:
+
+```bash
+git clone <repo-url>
+cd mini-framework
+```
+
+2. Install dependencies (if you use Composer for any packages):
+
+```bash
+composer install
+```
+
+3. Configure the database in `config/database.php` and point your web server document root to the `public/` directory.
+
+Usage
+- Routes are defined in `routes/web.php`.
+- Controllers live in `app/Controllers`.
+- Views are in `views/` and layouts in `views/layouts`.
+
+CLI
+- Run `php artisan` for available commands (migration helpers or custom tasks).
+
+Directory structure
+
+```text
+├── app/                    # Application controllers and models
+├── bootstrap/              # Bootstrapping and container binding
+├── config/                 # Configuration files
+├── core/                   # Framework core (Router, Container, DB, Middleware)
+├── public/                 # Front controller (index.php)
+├── routes/                 # Route definitions
+├── views/                  # Templates and layouts
+└── artisan                 # Simple CLI entrypoint
+```
+
+Contributing
+- Open issues or submit pull requests. Keep changes small and focused.
+
+License
+- MIT
 
 ---
 
-## 📂 ෆෝල්ඩර් ව්‍යුහය (Directory Structure)
+## සිංහල විස්තරය
+
+මෙය Laravel Framework එකෙහි මූලික ආකෘතිය (Core Architecture) පදනම් කර ගනිමින් PHP මඟින් නිර්මාණය කරන ලද සරල එහෙත් ඉතාමත් බලගතු MVC වෙබ් ෆ්‍රේම්වර්ක් එකකි. මෙහි Service Container, Dependency Injection, Middleware, Custom CLI (Artisan) සහ CSRF Protection වැනි ප්‍රධාන සංකල්ප අන්තර්ගත වේ.
+
+### ෆෝල්ඩර් ව්‍යුහය
 
 ```text
 ├── app/
 │   └── Controllers/        # Business Logic සහ Request හැසිරවීම
-├── bootstrap.php            # Service Container සහ Core Services බින්දු (Bind) කරන තැන
+├── bootstrap/
+│   └── app.php             # Service Container සහ Core Services bind කරන තැන
 ├── config/
-│   └── database.php        # මධ්‍යගත දත්ත ගබඩා වින්‍යාසයන් (Database Configurations)
+│   └── database.php        # දත්ත ගබඩා වින්‍යාස
 ├── core/
-│   ├── App.php             # Bootstrap Logic එක (App::get())
-│   ├── Container.php       # Service Container එක (Central Dependency Box)
-│   ├── Database.php        # PDO Connection එක පමණක් කළමනාකරණය කරයි
-│   ├── Route.php           # Static Route Wrapper (Route::get(), Route::post())
-│   ├── Router.php          # Request Match කිරීම සහ Middleware ක්‍රියාත්මක කිරීම
-│   ├── helpers.php         # Global Helpers (view(), csrf_token(), csrf_field())
-│   └── Middleware/         # HTTP Request පෙරහන් පද්ධතිය (Security Layers)
+│   ├── App.php
+│   ├── Container.php
+│   ├── Database/
+│   ├── Http/
+│   └── Middleware/
 ├── public/
-│   └── index.php           # වෙබ් අඩවියට පිවිසෙන ප්‍රධාන ද්වාරය (Front Controller)
+│   └── index.php
 ├── routes/
-│   └── web.php             # වෙබ් අඩවියේ සියලුම ලිපින (Routes) ලියාපදිංචි කරන ස්ථානය
-├── views/                  # HTML Templates සහ Layouts
-└── artisan                 # අපේම අභිමත CLI Script එක (Database Migrations)
+│   └── web.php
+└── artisan
+```
 

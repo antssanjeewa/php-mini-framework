@@ -20,4 +20,9 @@ class App
   {
     self::$container->bind($key, $resolver);
   }
+
+  public static function singleton(string $key, callable $resolver)
+  {
+    self::$container->singleton($key, $resolver);
+  }
 }

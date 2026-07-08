@@ -7,17 +7,13 @@ use Exception;
 
 class Database
 {
-  /**
-   * Database Connection එක ලබාදෙන මධ්‍යගත Method එක
-   */
-  public static function connect(): PDO
+
+  private PDO $pdo;
+
+  public function __construct(array $config)
   {
-
-    $config = require __DIR__ . '/../config/database.php';
-
     $dsn = "mysql:host={$config['host']};dbname={$config['dbname']};charset={$config['charset']}";
 
-    // PDO සඳහා අමතර Settings (Error Handling සහ Fetch Mode)
     $options = [
       PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
       PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -25,9 +21,15 @@ class Database
     ];
 
     try {
-      return new PDO($dsn, $config['username'], $config['password'], $options);
+      $this->pdo = new PDO($dsn, $config['username'], $config['password'], $options);
     } catch (PDOException $e) {
       throw new Exception("Database Connection Error 🔌: " . $e->getMessage());
     }
+  }
+
+  public function connection(): PDO
+  {
+    return $this->pdo;
+
   }
 }
