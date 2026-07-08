@@ -51,7 +51,7 @@ class Validator
 
   private function validateString($field, $value)
   {
-    if (is_string($value)) {
+    if (!is_string($value)) {
       $this->addError($field, "{$field} must be string!");
     }
   }

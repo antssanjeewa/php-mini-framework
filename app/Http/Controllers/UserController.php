@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Http\Models\User;
 use Core\Http\Controller;
 use Core\Http\Request;
 
@@ -22,12 +22,12 @@ class UserController extends Controller
 
   public function store(Request $request)
   {
-    $request->validate([
+    $data = $request->validate([
       'name' => 'required|string|max:50',
       'email' => 'required|min:6'
     ]);
 
-    User::store($request->input('name'), $request->input('email'));
+    User::create($data);
 
     return $this->redirect();
   }

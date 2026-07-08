@@ -30,7 +30,7 @@ class Request
     return parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
   }
 
-  public function validate(array $rules)
+  public function validate(array $rules): array|null
   {
     $validator = new Validator();
 
@@ -40,7 +40,7 @@ class Request
       session('errors', $validator->errors());
       session('old', $this->input());
 
-      return go_back();
+      go_back();
     }
 
     return $this->input();
