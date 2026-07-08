@@ -61,6 +61,8 @@ class Router
 
   private function executeAction($routeElement, $arguments)
   {
+    $finalArguments = array_merge([request()], $arguments);
+
     // 2. Action එක Array එකක් නම් (Controller Handling)
     if (is_array($routeElement->action)) {
       if (count($routeElement->action) < 2) {
@@ -81,11 +83,11 @@ class Router
       }
 
       // 💡 වැදගත්ම දේ: Arguments ද සමඟින් Method එක dynamic ලෙස run කිරීම
-      return call_user_func_array([$controllerInstance, $method], $arguments);
+      return call_user_func_array([$controllerInstance, $method], $finalArguments);
     }
 
     // 3. Action එක Closure (Function) එකක් නම්
-    return call_user_func_array($routeElement->action, $arguments);
+    return call_user_func_array($routeElement->action, $finalArguments);
   }
 
   private function runMiddlewarePipeline($middleware, $destination)
