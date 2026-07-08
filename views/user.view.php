@@ -18,6 +18,8 @@
       required
       style="width: 100%; padding: 8px;">
   </div>
+  <span class="text-danger"
+    style="color: red;"><?= errors('name') ?></span>
 
   <div style="margin-bottom: 15px;">
     <label for="email"
@@ -28,6 +30,10 @@
       required
       style="width: 100%; padding: 8px;">
   </div>
+  <span class="text-danger"
+    style="color: red;">
+    <?= errors('email') ?>
+  </span>
 
   <button type="submit"
     style="background: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 3px; cursor: pointer;">

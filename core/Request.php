@@ -29,4 +29,20 @@ class Request
   {
     return parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
   }
+
+  public function validate(array $rules)
+  {
+    $validator = new Validator();
+
+    $isValidate = $validator->validate($this->input(), $rules);
+
+    if (!$isValidate) {
+      session('errors', $validator->errors());
+      session('old', $this->input());
+
+      return go_back();
+    }
+
+    return $this->input();
+  }
 }

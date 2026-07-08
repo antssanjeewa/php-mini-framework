@@ -21,8 +21,13 @@ class UserController
 
   public function store(Request $request)
   {
+    $request->validate([
+      'name' => 'required|string|max:50',
+      'email' => 'required|min:6'
+    ]);
+
     User::store($request->input('name'), $request->input('email'));
 
-    redirect();
+    go_back();
   }
 }

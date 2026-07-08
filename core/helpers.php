@@ -83,6 +83,13 @@ if (!function_exists('redirect')) {
   }
 }
 
+if (!function_exists('go_back')) {
+  function go_back()
+  {
+    return redirect($_SERVER['HTTP_REFERER'] ?? '/');
+  }
+}
+
 if (!function_exists('request')) {
   function request()
   {
@@ -94,5 +101,29 @@ if (!function_exists('input')) {
   function input(?string $key = null, $default = null)
   {
     return request()->input($key, $default);
+  }
+}
+
+if (!function_exists('errors')) {
+  function errors(?string $key = null)
+  {
+    $errors = session('errors');
+
+    if (!$errors) {
+      return null;
+    }
+
+    if ($key === null) {
+      unset($_SESSION['errors']);
+      return $errors;
+    }
+
+    if (isset($errors[$key])) {
+      $firstError = reset($errors[$key]);
+      unset($_SESSION['errors'][$key]);
+      return $firstError;
+    }
+
+    return null;
   }
 }

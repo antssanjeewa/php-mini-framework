@@ -54,6 +54,10 @@
     <a href="/user/1">Profile (User 1)</a>
   </nav>
 
+  <div>
+
+  </div>
+
   <div class="container">
     {{content}}
   </div>
