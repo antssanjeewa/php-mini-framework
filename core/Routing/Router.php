@@ -1,7 +1,8 @@
 <?php
 
-namespace Core;
+namespace Core\Routing;
 
+use Core\Http\Request;
 use Core\Middleware\MiddlewareMap;
 
 class Router

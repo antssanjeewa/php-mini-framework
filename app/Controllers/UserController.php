@@ -3,8 +3,8 @@
 namespace App\Controllers;
 
 use App\Models\User;
-use Core\Controller;
-use Core\Request;
+use Core\Http\Controller;
+use Core\Http\Request;
 
 class UserController extends Controller
 {

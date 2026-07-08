@@ -1,5 +1,5 @@
 <?php
-namespace Core;
+namespace Core\Routing;
 
 class Route
 {

@@ -2,8 +2,8 @@
 
 use Core\App;
 use Core\Container;
-use Core\Database;
-use Core\Request;
+use Core\Database\Database;
+use Core\Http\Request;
 
 $container = new Container();
 

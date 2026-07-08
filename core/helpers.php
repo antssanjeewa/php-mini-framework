@@ -1,7 +1,7 @@
 <?php
 
 use Core\App;
-use Core\Request;
+use Core\Http\Request;
 
 if (session_status() === PHP_SESSION_NONE) {
   session_start();
