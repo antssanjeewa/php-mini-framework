@@ -55,7 +55,11 @@
   </nav>
 
   <div>
-
+    <?php if (session('success')): ?>
+      <p>
+        <?php echo session('success') ?? '-'; ?>
+      </p>
+    <?php endif; ?>
   </div>
 
   <div class="container">

@@ -10,14 +10,15 @@ class UserController extends Controller
 {
   public function index()
   {
-    return $this->view('user');
+    $users = User::all();
+    return $this->view('user', ['users' => $users]);
   }
 
   public function show(Request $request, $id)
   {
     $user = User::find($id);
 
-    return $this->view('user', ['id' => $id]);
+    return $this->view('user', ['user' => $user]);
   }
 
   public function store(Request $request)
@@ -27,8 +28,13 @@ class UserController extends Controller
       'email' => 'required|min:6'
     ]);
 
-    User::create($data);
-
-    return $this->redirect();
+    if ($request->input('id')) {
+      User::update($request->input('id'), $data);
+      session('success', 'Updated Successfully');
+    } else {
+      User::create($data);
+      session('success', 'Created Successfully');
+    }
+    return $this->redirect('/user');
   }
 }
