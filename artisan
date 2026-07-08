@@ -1,47 +1,36 @@
-#!/usr/bin/php
+#!/usr/bin/env php
 <?php
 
 require_once __DIR__ . '/vendor/autoload.php';
-$app = require_once __DIR__ . '/../bootstrap/app.php';
+$app = require_once __DIR__ . '/bootstrap/app.php';
 
 $command = $argv[1] ?? null;
 
 if ($command === 'migrate') {
-  echo "🚀 Migration Start...";
-  $config = require __DIR__ . '/config/database.php';
+  echo "Starting migrations..." . PHP_EOL;
+
+  $file = 'm0001_create_users_table.php';
+
+  require_once base_path('/database/migrations/' . $file);
 
   try {
-    $db = app('db');
-  } catch (\Exception $e) {
-    if (strpos($e->getMessage(), '[1049] Unknown database') !== false) {
+    $className = pathinfo($file, PATHINFO_FILENAME);
+    echo "Applying: $className" . PHP_EOL;
 
-      echo "\n⚠️  '{$config['dbname']}' කියන Database එක සොයාගත නොහැක.\n";
-      $input = readline("❓ ඔබට මෙම Database එක අලුතෙන් නිර්මාණය කිරීමට අවශ්‍යද? (yes/no) [no]: ");
+    $migration = new $className();
+    $migration->up();
 
-      if (strtolower(trim($input)) === 'yes') {
-        echo "🔨 Database එක නිර්මාණය කරමින්...\n";
+    echo "Successfully migrated!" . PHP_EOL;
 
-        // Config එකේ දත්ත පාවිච්චි කර සර්වර් එකට සම්බන්ධ වීම
-        $serverConn = new \PDO("mysql:host={$config['host']}", $config['username'], $config['password']);
-        $serverConn->exec("CREATE DATABASE `{$config['dbname']}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
-
-        echo "✅ Database එක සාර්ථකව නිර්මාණය වුණා!\n";
-        $db = app('db');
-      } else {
-        echo "❌ Migration ක්‍රියාවලිය නවතා දැමුවා.\n";
-        exit(1);
-      }
-    } else {
-      echo "❌ " . $e->getMessage() . "\n";
-      exit(1);
-    }
+  } catch (\Throwable $e) {
+    echo "❌ Migration Failed!" . PHP_EOL;
+    echo "📁 File: " . $file . PHP_EOL;
+    echo "💬 Error Message: " . $e->getMessage() . PHP_EOL;
+    echo "📍 Line: " . $e->getLine() . PHP_EOL;
+    exit(1);
   }
+}
 
-  try {
-    $sql = "CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100) NOT NULL, email VARCHAR(100) NOT NULL);";
-    $db->exec($sql);
-    echo "✅ සියලුම Tables සාර්ථකව එකතු වුණා!\n";
-  } catch (\Exception $e) {
-    echo "❌ Tables Error: " . $e->getMessage() . "\n";
-  }
+if ($command === 'make') {
+
 }
