@@ -18,14 +18,14 @@ class Router
     return $routeEl;
   }
 
-  public function resolve(string $requestUri, string $requestMethod)
+  public function resolve(Request $request)
   {
-    $method = strtoupper($requestMethod);
+    $method = strtoupper($request->method());
     $routesToScan = $this->routes[$method] ?? [];
 
     foreach ($routesToScan as $route => $routeElement) {
 
-      $arguments = $this->extractArguments($route, $requestUri);
+      $arguments = $this->extractArguments($route, $request->uri());
 
       if ($arguments !== false) {
         $destination = function () use ($routeElement, $arguments) {

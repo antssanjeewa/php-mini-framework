@@ -23,8 +23,8 @@ class Route
     return self::getRouter()->add('POST', $uri, $action);
   }
 
-  public static function handle(string $requestUri, string $requestMethod)
+  public static function handle($request)
   {
-    return self::getRouter()->resolve($requestUri, $requestMethod);
+    return self::getRouter()->resolve($request);
   }
 }

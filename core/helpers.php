@@ -1,6 +1,7 @@
 <?php
 
 use Core\App;
+use Core\Request;
 
 if (session_status() === PHP_SESSION_NONE) {
   session_start();
@@ -79,5 +80,19 @@ if (!function_exists('redirect')) {
   {
     header("Location: {$url}");
     exit;
+  }
+}
+
+if (!function_exists('request')) {
+  function request()
+  {
+    return app(Request::class);
+  }
+}
+
+if (!function_exists('input')) {
+  function input(?string $key = null, $default = null)
+  {
+    return request()->input($key, $default);
   }
 }
