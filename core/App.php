@@ -5,6 +5,7 @@ namespace Core;
 class App
 {
   private static Container $container;
+  private static array $bootedProviders = [];
 
   public static function setContainer(Container $container)
   {
@@ -31,9 +32,25 @@ class App
     $config = require base_path('config/app.php');
     $providers = $config['providers'] ?? [];
 
+    self::registerProviders($providers);
+    self::bootProviders();
+
+  }
+
+  public static function registerProviders(array $providers)
+  {
     foreach ($providers as $providerClass) {
       $provider = new $providerClass();
       $provider->register();
+
+      self::$bootedProviders[] = $provider;
+    }
+  }
+
+  public static function bootProviders()
+  {
+    foreach (self::$bootedProviders as $provider) {
+      $provider->boot();
     }
   }
 }

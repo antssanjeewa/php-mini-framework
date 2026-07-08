@@ -13,8 +13,6 @@ define('BASE_PATH', dirname(__DIR__) . '/');
 require_once __DIR__ . '/../vendor/autoload.php';
 $app = require_once __DIR__ . '/../bootstrap/app.php';
 
-// 2. වෙන් කරන ලද Routes ෆයිල් එක සම්බන්ධ කිරීම
-require_once __DIR__ . '/../routes/web.php';
 
 try {
   echo Route::handle(request());
