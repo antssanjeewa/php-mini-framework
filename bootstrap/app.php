@@ -1,6 +1,6 @@
 <?php
 
-use App\Providers\DatabaseServiceProvider;
+
 use Core\App;
 use Core\Container;
 use Core\Http\Request;
@@ -12,5 +12,4 @@ App::singleton(Request::class, function () {
   return new Request();
 });
 
-$dbProvider = new DatabaseServiceProvider();
-$dbProvider->register();
+App::boot();

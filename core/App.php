@@ -25,4 +25,15 @@ class App
   {
     self::$container->singleton($key, $resolver);
   }
+
+  public static function boot()
+  {
+    $config = require base_path('config/app.php');
+    $providers = $config['providers'] ?? [];
+
+    foreach ($providers as $providerClass) {
+      $provider = new $providerClass();
+      $provider->register();
+    }
+  }
 }
