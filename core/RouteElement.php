@@ -7,7 +7,7 @@ class RouteElement
   public string $method;
   public string $uri;
   public $action;
-  public ?string $middleware = null;
+  public array $middleware = [];
 
   public function __construct($method, $uri, $action)
   {
@@ -18,8 +18,16 @@ class RouteElement
 
   public function middleware($name)
   {
-    $this->middleware = $name; // 💡 ලැබෙන middleware නම object එකේ සේව් කරගනී
+    $names = explode(',', $name);
 
-    return $this; // 💡 Method Chaining දිගටම කරගෙන යාමට තමන්වම return කරයි!
+    foreach ($names as $middlewareName) {
+
+      if (!in_array($middlewareName, $this->middleware)) {
+
+        $this->middleware[] = $middlewareName;
+      }
+    }
+
+    return $this;
   }
 }

@@ -4,7 +4,7 @@ namespace Core\Middleware;
 
 class VerifyCsrfToken implements MiddlewareInterface
 {
-  public function handle()
+  public function handle($next)
   {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $formToken = $_POST['csrf_token'] ?? null;
@@ -15,5 +15,7 @@ class VerifyCsrfToken implements MiddlewareInterface
         throw new \Exception("419 | CSRF Token Mismatch!");
       }
     }
+
+    return $next();
   }
 }
