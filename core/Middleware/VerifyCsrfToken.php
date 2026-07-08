@@ -8,7 +8,7 @@ class VerifyCsrfToken implements MiddlewareInterface
   {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $formToken = $_POST['csrf_token'] ?? null;
-      $sessionToken = $_SESSION['csrf_token'] ?? null;
+      $sessionToken = csrf_token();
 
       if (!$formToken || $formToken !== $sessionToken) {
         http_response_code(419); // 419 Page Expired (Laravel Standard)

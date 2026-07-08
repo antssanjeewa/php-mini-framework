@@ -24,8 +24,7 @@ class UserController
     $email = $_POST['email'] ?? null;
 
     User::store($name, $email);
-    // අපි දැනට මුල් පිටුවට (Home page) හරවා යවමු
-    header('Location: /');
-    exit;
+
+    redirect();
   }
 }

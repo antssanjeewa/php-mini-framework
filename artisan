@@ -4,8 +4,6 @@
 require_once __DIR__ . '/vendor/autoload.php';
 $app = require_once __DIR__ . '/../bootstrap/app.php';
 
-use Core\App;
-
 $command = $argv[1] ?? null;
 
 if ($command === 'migrate') {
@@ -13,7 +11,7 @@ if ($command === 'migrate') {
   $config = require __DIR__ . '/config/database.php';
 
   try {
-    $db = App::get('db');
+    $db = app('db');
   } catch (\Exception $e) {
     if (strpos($e->getMessage(), '[1049] Unknown database') !== false) {
 
@@ -28,7 +26,7 @@ if ($command === 'migrate') {
         $serverConn->exec("CREATE DATABASE `{$config['dbname']}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
 
         echo "✅ Database එක සාර්ථකව නිර්මාණය වුණා!\n";
-        $db = App::get('db');
+        $db = app('db');
       } else {
         echo "❌ Migration ක්‍රියාවලිය නවතා දැමුවා.\n";
         exit(1);

@@ -1,5 +1,7 @@
 <?php
 
+use Core\App;
+
 if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
@@ -52,5 +54,30 @@ if (!function_exists('csrf_field')) {
   function csrf_field()
   {
     return '<input type="hidden" name="csrf_token" value="' . csrf_token() . '">';
+  }
+}
+
+if (!function_exists('session')) {
+  function session(string $key, $value = null)
+  {
+    if ($value) {
+      $_SESSION[$key] = $value;
+    }
+    return $_SESSION[$key] ?? null;
+  }
+}
+
+if (!function_exists('app')) {
+  function app(string $key)
+  {
+    return App::get($key);
+  }
+}
+
+if (!function_exists('redirect')) {
+  function redirect(string $url = '/')
+  {
+    header("Location: {$url}");
+    exit;
   }
 }
