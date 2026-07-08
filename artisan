@@ -5,32 +5,98 @@ require_once __DIR__ . '/vendor/autoload.php';
 $app = require_once __DIR__ . '/bootstrap/app.php';
 
 $command = $argv[1] ?? null;
+$parts = explode(':', $command);
+$baseCommand = $parts[0];
+$action = $parts[1] ?? null;
 
-if ($command === 'migrate') {
-  echo "Starting migrations..." . PHP_EOL;
+if ($baseCommand === 'migrate') {
+  echo "\033[32mStarting migrations..." . PHP_EOL;
 
-  $file = 'm0001_create_users_table.php';
+  $migrationsFolder = base_path('/database/migrations/');
+  $allFiles = scandir($migrationsFolder);
+  $migrationFiles = array_diff($allFiles, ['.', '..']);
 
-  require_once base_path('/database/migrations/' . $file);
+  if ($action === 'refresh') {
+    $reversedFiles = array_reverse($migrationFiles);
+    foreach ($reversedFiles as $file) {
+      require_once $migrationsFolder . '/' . $file;
 
-  try {
-    $className = pathinfo($file, PATHINFO_FILENAME);
-    echo "Applying: $className" . PHP_EOL;
+      try {
+        $className = pathinfo($file, PATHINFO_FILENAME);
+        echo "Applying: $className" . PHP_EOL;
 
-    $migration = new $className();
-    $migration->up();
+        $migration = new $className();
+        $migration->down();
+        echo "✅ Successfully truncate: $className" . PHP_EOL . PHP_EOL;
+      } catch (\Throwable $e) {
+        echo "\033[31m❌ Migration Failed!" . PHP_EOL;
+        echo "📁 File: " . $file . PHP_EOL;
+        echo "💬 Error Message: " . $e->getMessage() . PHP_EOL;
+        echo "📍 Line: " . $e->getLine() . PHP_EOL;
+        exit(1);
+      }
+    }
 
-    echo "Successfully migrated!" . PHP_EOL;
-
-  } catch (\Throwable $e) {
-    echo "❌ Migration Failed!" . PHP_EOL;
-    echo "📁 File: " . $file . PHP_EOL;
-    echo "💬 Error Message: " . $e->getMessage() . PHP_EOL;
-    echo "📍 Line: " . $e->getLine() . PHP_EOL;
-    exit(1);
   }
+
+  foreach ($migrationFiles as $file) {
+    require_once $migrationsFolder . '/' . $file;
+
+    try {
+      $className = pathinfo($file, PATHINFO_FILENAME);
+      echo "Applying: $className" . PHP_EOL;
+
+      $migration = new $className();
+      $migration->up();
+      echo "✅ Successfully applied: $className" . PHP_EOL . PHP_EOL;
+
+    } catch (\Throwable $e) {
+      echo "\033[31m❌ Migration Failed!" . PHP_EOL;
+      echo "📁 File: " . $file . PHP_EOL;
+      echo "💬 Error Message: " . $e->getMessage() . PHP_EOL;
+      echo "📍 Line: " . $e->getLine() . PHP_EOL;
+      exit(1);
+    }
+  }
+  echo "\033[32mSuccessfully migrated!" . PHP_EOL;
+
 }
 
-if ($command === 'make') {
+if ($baseCommand === 'make') {
+  $migrationName = $argv[2] ?? null;
 
+  if (!$migrationName) {
+    echo "\033[31m❌ Please provide a migration name! (e.g., php ace make:migration create_posts_table)\033[0m" . PHP_EOL;
+    exit(1);
+  }
+
+  if ($action === 'migration') {
+    $timestamp = date('Y_m_d_His');
+    $fileName = "m_{$timestamp}_{$migrationName}.php";
+    $filePath = base_path("/database/migrations/{$fileName}");
+
+    $stub = "<?php
+
+use Core\Database\Migration;
+
+class {$migrationName} extends Migration
+{
+    public function up()
+    {
+        \$db = \Core\Application::\$app->db->pdo;
+        // \$sql = \"CREATE TABLE ...\";
+        // \$db->exec(\$sql);
+    }
+
+    public function down()
+    {
+        \$db = \Core\Application::\$app->db->pdo;
+        // \$sql = \"DROP TABLE IF EXISTS ...\";
+        // \$db->exec(\$sql);
+    }
+};";
+
+    file_put_contents($filePath, $stub);
+    echo "\033[32m✨ Created Migration: {$fileName}\033[0m" . PHP_EOL;
+  }
 }
