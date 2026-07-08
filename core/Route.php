@@ -15,12 +15,12 @@ class Route
 
   public static function get(string $uri, $action)
   {
-    self::getRouter()->add('GET', $uri, $action);
+    return self::getRouter()->add('GET', $uri, $action);
   }
 
   public static function post(string $uri, $action)
   {
-    self::getRouter()->add('POST', $uri, $action);
+    return self::getRouter()->add('POST', $uri, $action);
   }
 
   public static function handle(string $requestUri, string $requestMethod)

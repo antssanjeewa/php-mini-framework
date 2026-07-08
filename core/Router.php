@@ -2,6 +2,8 @@
 
 namespace Core;
 
+use Core\Middleware\MiddlewareMap;
+
 class Router
 {
   private array $routes = [
@@ -11,7 +13,9 @@ class Router
 
   public function add(string $method, string $uri, $callback)
   {
-    $this->routes[strtoupper($method)][$uri] = $callback;
+    $routeEl = new RouteElement($method, $uri, $callback);
+    $this->routes[strtoupper($method)][$uri] = $routeEl;
+    return $routeEl;
   }
 
   public function resolve(string $requestUri, string $requestMethod)
@@ -20,7 +24,7 @@ class Router
     $routesToScan = $this->routes[$method] ?? [];
 
     // 1. හැම රූට් එකක්ම පරීක්ෂා කිරීම සඳහා ලූප් එකක් භාවිතා කරයි
-    foreach ($routesToScan as $route => $action) {
+    foreach ($routesToScan as $route => $routeElement) {
 
       // සාමාන්‍ය රූට් එකක් Regex රටාවකට හැරවීම
       // උදා: '/user/{id}' -> '/^\/user\/([0-9]+)$/'
@@ -37,21 +41,29 @@ class Router
 
         // Route එකට අදාළව Middleware එකක් තිබේදැයි බැලීම
         if ($method === 'POST') {
-          $middlewareClass = \Core\Middleware\MiddlewareMap::find('csrf');
+          $middlewareClass = MiddlewareMap::find('csrf');
           if ($middlewareClass) {
             $middlewareInstance = new $middlewareClass();
             $middlewareInstance->handle(); // 🛡️ මුලින්ම ආරක්ෂක වැට ක්‍රියාත්මක වේ!
           }
         }
 
+        if ($routeElement->middleware) {
+          $middlewareClass = MiddlewareMap::find($routeElement->middleware);
+          if ($middlewareClass) {
+            $middlewareInstance = new $middlewareClass();
+            $middlewareInstance->handle();
+          }
+        }
+
         // 2. Action එක Array එකක් නම් (Controller Handling)
-        if (is_array($action)) {
-          if (count($action) < 2) {
+        if (is_array($routeElement->action)) {
+          if (count($routeElement->action) < 2) {
             throw new \Exception("Route Error: Controller method එක සඳහන් කර නැත!");
           }
 
-          $controllerNode = $action[0];
-          $method = $action[1];
+          $controllerNode = $routeElement->action[0];
+          $method = $routeElement->action[1];
 
           if (!class_exists($controllerNode)) {
             throw new \Exception("Route Error: Class '{$controllerNode}' සොයාගත නොහැක!");
@@ -68,7 +80,7 @@ class Router
         }
 
         // 3. Action එක Closure (Function) එකක් නම්
-        return call_user_func_array($action, $arguments);
+        return call_user_func_array($routeElement->action, $arguments);
       }
     }
 
