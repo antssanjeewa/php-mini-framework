@@ -3,7 +3,10 @@
 namespace Core\Routing;
 
 use Core\Http\Request;
+use Core\Http\Response;
 use Core\Middleware\MiddlewareMap;
+use ReflectionFunction;
+use ReflectionMethod;
 
 class Router
 {
@@ -25,7 +28,6 @@ class Router
     $routesToScan = $this->routes[$method] ?? [];
 
     foreach ($routesToScan as $route => $routeElement) {
-
       $arguments = $this->extractArguments($route, $request->uri());
 
       if ($arguments !== false) {
@@ -37,34 +39,27 @@ class Router
       }
     }
 
-    // කිසිම රූට් එකක් මැච් වුණේ නැත්නම් 404
-    http_response_code(404);
-    return view('errors/404');
+    return new Response(view('errors/404'), Response::HTTP_NOT_FOUND);
   }
 
   private function extractArguments($route, $requestUri)
   {
-    // සාමාන්‍ය රූට් එකක් Regex රටාවකට හැරවීම
-    // උදා: '/user/{id}' -> '/^\/user\/([0-9]+)$/'
-    $routePattern = preg_replace('/\{[a-zA-Z0-9_]+\}/', '([0-9]+)', $route);
+
+    // Ex: '/user/{id}' -> '/^\/user\/([0-9]+)$/'
+    $routePattern = preg_replace('/\{[a-zA-Z0-9_]+\}/', '([a-zA-Z0-9_\-]+)', $route);
     $finalPattern = "#^" . $routePattern . "$#";
 
-    // බ්‍රවුසර් URL එක සහ රූට් රටාව ගැලපේදැයි බැලීම
+    // URL Check
     if (preg_match($finalPattern, $requestUri, $matches)) {
-      // print_r($matches);
-      // URL එකේ තිබුණු ID (Arguments) ටික වෙන් කර ගැනීම
-      // $matches[0] වල තියෙන්නේ මුළු URL එකමයි, $matches[1] වල ඉඳන් තමා අගයන් තියෙන්නේ
-      array_shift($matches); // පළමු අගය ඉවත් කරයි
-      return $matches; // දැන් මෙහි [5] වැනි අගයන් පවතී
+
+      array_shift($matches); // remove url in 0 index
+      return $matches; // get only params
     }
     return false;
   }
 
   private function executeAction($routeElement, $arguments)
   {
-    $finalArguments = array_merge([request()], $arguments);
-
-    // 2. Action එක Array එකක් නම් (Controller Handling)
     if (is_array($routeElement->action)) {
       if (count($routeElement->action) < 2) {
         throw new \Exception("Route Error: Controller method එක සඳහන් කර නැත!");
@@ -83,12 +78,15 @@ class Router
         throw new \Exception("Route Error: Method '{$method}' සොයාගත නොහැක!");
       }
 
-      // 💡 වැදගත්ම දේ: Arguments ද සමඟින් Method එක dynamic ලෙස run කිරීම
-      return call_user_func_array([$controllerInstance, $method], $finalArguments);
+      $reflectionMethod = new ReflectionMethod($controllerInstance, $method);
+      $dependencies = $this->resolveActionDependencies($reflectionMethod, $arguments);
+
+      return call_user_func_array([$controllerInstance, $method], $dependencies);
     }
 
-    // 3. Action එක Closure (Function) එකක් නම්
-    return call_user_func_array($routeElement->action, $finalArguments);
+    $reflectionMethod = new ReflectionFunction($routeElement->action);
+    $dependencies = $this->resolveActionDependencies($reflectionMethod, $arguments);
+    return call_user_func_array($routeElement->action, $dependencies);
   }
 
   private function runMiddlewarePipeline($middleware, $destination)
@@ -108,5 +106,25 @@ class Router
       $destination
     );
     return $pipeline();
+  }
+
+  private function resolveActionDependencies(\ReflectionFunctionAbstract $reflection, array &$arguments): array
+  {
+    $parameters = $reflection->getParameters();
+    $dependencies = [];
+    foreach ($parameters as $parameter) {
+      $type = $parameter->getType();
+      if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
+        $dependencies[] = app($type->getName());
+      } else {
+        if ($parameter->isDefaultValueAvailable()) {
+          $dependencies[] = $parameter->getDefaultValue();
+        } else {
+          $dependencies[] = array_shift($arguments);
+        }
+      }
+    }
+
+    return $dependencies;
   }
 }
