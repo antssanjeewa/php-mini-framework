@@ -5,6 +5,8 @@ namespace Core\Database;
 use PDO;
 
 /**
+ * @method static \Core\Database\QueryBuilder table(string $table)
+ * @method static \Core\Database\QueryBuilder setModel(string $model)
  * @method static \Core\Database\QueryBuilder where(string $column, string $operator, mixed $value = null)
  * @method static \Core\Database\QueryBuilder get()
  * @method static \Core\Database\QueryBuilder first()
@@ -87,53 +89,22 @@ class Model
   protected function hasMany(string $relatedModel, string $foreignKey)
   {
     $instance = new $relatedModel();
-
-    $stmt = self::$db->prepare("SELECT * FROM $instance->table WHERE $foreignKey = :id");
-    $stmt->execute(['id' => $this->id]);
-
-    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    $models = [];
-
-    foreach ($rows as $row) {
-      $model = new $relatedModel();
-      $model->attributes = $row;
-      $models[] = $model;
-    }
-
-    return $models;
+    static::setModel($relatedModel);
+    return static::table($instance->table)->where($foreignKey, $this->id)->get();
   }
 
   protected function belongsTo(string $relatedModel, string $foreignId)
   {
     $instance = new $relatedModel();
-
-    $stmt = self::$db->prepare("SELECT * FROM $instance->table WHERE id = :id");
-    $stmt->execute(['id' => $foreignId]);
-
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$row) {
-      return null;
-    }
-
-    $instance->attributes = $row;
-    return $instance;
+    static::setModel($relatedModel);
+    return static::table($instance->table)->where('id', $foreignId)->first();
   }
 
   protected function hasOne(string $relatedModel, string $foreignKey)
   {
     $instance = new $relatedModel();
+    static::setModel($relatedModel);
+    return static::table($instance->table)->where($foreignKey, $this->id)->first();
 
-    $stmt = self::$db->prepare("SELECT * FROM $instance->table WHERE $foreignKey = :id");
-    $stmt->execute(['id' => $this->id]);
-
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$row) {
-      return null;
-    }
-
-    $instance->attributes = $row;
-    return $instance;
   }
 }
