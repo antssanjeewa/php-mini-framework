@@ -9,78 +9,16 @@ $parts = explode(':', $command);
 $baseCommand = $parts[0];
 $action = $parts[1] ?? null;
 
-if ($baseCommand === 'migrate') {
-  echo "\033[32mStarting migrations..." . PHP_EOL;
+$commands = [
+  'migrate' => \App\Console\Commands\MigrateCommand::class,
+  'make' => \App\Console\Commands\MakeCommand::class,
+];
 
-  $migrationsFolder = base_path('/database/migrations/');
-  $allFiles = scandir($migrationsFolder);
-  $migrationFiles = array_diff($allFiles, ['.', '..']);
-
-  if ($action === 'refresh') {
-    $reversedFiles = array_reverse($migrationFiles);
-    foreach ($reversedFiles as $file) {
-      require_once $migrationsFolder . '/' . $file;
-
-      try {
-        $className = pathinfo($file, PATHINFO_FILENAME);
-        echo "Applying: $className" . PHP_EOL;
-
-        $migration = new $className();
-        $migration->down();
-        echo "✅ Successfully truncate: $className" . PHP_EOL . PHP_EOL;
-      } catch (\Throwable $e) {
-        echo "\033[31m❌ Migration Failed!" . PHP_EOL;
-        echo "📁 File: " . $file . PHP_EOL;
-        echo "💬 Error Message: " . $e->getMessage() . PHP_EOL;
-        echo "📍 Line: " . $e->getLine() . PHP_EOL;
-        exit(1);
-      }
-    }
-
-  }
-
-  foreach ($migrationFiles as $file) {
-    require_once $migrationsFolder . '/' . $file;
-
-    try {
-      $className = pathinfo($file, PATHINFO_FILENAME);
-      echo "Applying: $className" . PHP_EOL;
-
-      $migration = new $className();
-      $migration->up();
-      echo "✅ Successfully applied: $className" . PHP_EOL . PHP_EOL;
-
-    } catch (\Throwable $e) {
-      echo "\033[31m❌ Migration Failed!" . PHP_EOL;
-      echo "📁 File: " . $file . PHP_EOL;
-      echo "💬 Error Message: " . $e->getMessage() . PHP_EOL;
-      echo "📍 Line: " . $e->getLine() . PHP_EOL;
-      exit(1);
-    }
-  }
-  echo "\033[32mSuccessfully migrated!" . PHP_EOL;
-
+if (!isset($commands[$baseCommand])) {
+  echo "\033[31m Unknown command!\033[0m" . PHP_EOL;
+  exit(1);
 }
 
-if ($baseCommand === 'make') {
-  $migrationName = $argv[2] ?? null;
-
-  if (!$migrationName) {
-    echo "\033[31m❌ Please provide a migration name! (e.g., php ace make:migration create_posts_table)\033[0m" . PHP_EOL;
-    exit(1);
-  }
-
-  if ($action === 'migration') {
-    $timestamp = date('Y_m_d_His');
-    $fileName = "m_{$timestamp}_{$migrationName}.php";
-    $filePath = base_path("/database/migrations/{$fileName}");
-
-    $stubPath = base_path('/core/stubs/migration.stub');
-    $stubContent = file_get_contents($stubPath);
-
-    $finalContent = str_replace('{{migrationName}}', $migrationName, $stubContent);
-
-    file_put_contents($filePath, $finalContent);
-    echo "\033[32m✨ Created Migration: {$fileName}\033[0m" . PHP_EOL;
-  }
-}
+$commandClass = $commands[$baseCommand];
+$command = new $commandClass();
+$command->execute($action, array_slice($argv, 2));
