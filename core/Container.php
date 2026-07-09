@@ -36,6 +36,43 @@ class Container
       return $object;
     }
 
+    if (class_exists($key)) {
+      return $this->resolve($key);
+    }
+
     throw new Exception("Not register $key");
+  }
+
+  private function resolve(string $class)
+  {
+    $reflectionClass = new \ReflectionClass($class);
+
+    $constructor = $reflectionClass->getConstructor();
+
+    // if not constructor can create plain object
+    if ($constructor === null) {
+      return new $class();
+    }
+
+    $parameters = $constructor->getParameters();
+
+    $dependencies = [];
+
+    foreach ($parameters as $parameter) {
+      $type = $parameter->getType();
+
+      if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
+        $dependencies[] = $this->get($type->getName());
+
+      } else {
+        if ($parameter->isDefaultValueAvailable()) {
+          $dependencies[] = $parameter->getDefaultValue();
+        } else {
+          throw new Exception("Cannot resolve dependency [{$parameter->getName()}] in class [{$class}]");
+        }
+      }
+    }
+
+    return new $class(...$dependencies);
   }
 }

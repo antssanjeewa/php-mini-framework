@@ -15,6 +15,9 @@ class Kernel
 
     $response = $router->resolve($request);
 
+    if ($response instanceof Response) {
+      return $response;
+    }
     return new Response($response);
   }
 }

@@ -8,27 +8,29 @@ class Controller
   {
     extract($data);
     ob_start();
-    $viewFile = dirname(__DIR__) . "/../views/{$viewName}.view.php";
+    $viewFile = base_path("/views/{$viewName}.view.php");
+    $status = Response::HTTP_OK;
 
     if (file_exists($viewFile)) {
       require $viewFile;
     } else {
-      require dirname(__DIR__) . "/../views/errors/404.view.php";
+      $status = Response::HTTP_NOT_FOUND;
+      require base_path("/views/errors/404.view.php");
     }
     $viewContent = ob_get_clean();
 
     ob_start();
-    require dirname(__DIR__) . "/../views/layouts/main.view.php";
+    require base_path("/views/layouts/main.view.php");
     $layoutContent = ob_get_clean();
 
-    return str_replace('{{content}}', $viewContent, $layoutContent);
+    $html = str_replace('{{content}}', $viewContent, $layoutContent);
+
+    return new Response($html, $status);
   }
 
   public function json(array $data)
   {
-    header('Content-Type: application/json');
-    echo json_encode($data);
-    exit;
+    return new Response(json_encode($data), Response::HTTP_OK, ['Content-Type: application/json']);
   }
 
   public function redirect(string|null $url = null)
@@ -36,7 +38,6 @@ class Controller
     if ($url === null)
       $url = $_SERVER['HTTP_REFERER'] ?? '/';
 
-    header("Location: {$url}");
-    exit;
+    return new Response('', Response::HTTP_REDIRECT, ["Location: {$url}"]);
   }
 }

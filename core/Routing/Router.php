@@ -77,7 +77,7 @@ class Router
         throw new \Exception("Route Error: Class '{$controllerNode}' සොයාගත නොහැක!");
       }
 
-      $controllerInstance = new $controllerNode();
+      $controllerInstance = app("$controllerNode");
 
       if (!method_exists($controllerInstance, $method)) {
         throw new \Exception("Route Error: Method '{$method}' සොයාගත නොහැක!");

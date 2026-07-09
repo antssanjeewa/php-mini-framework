@@ -2,8 +2,6 @@
 
 namespace Core\Database;
 
-use PDO;
-
 /**
  * @method static \Core\Database\QueryBuilder table(string $table)
  * @method static \Core\Database\QueryBuilder setModel(string $model)
