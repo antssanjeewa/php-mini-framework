@@ -4,6 +4,13 @@ namespace Core\Database;
 
 use PDO;
 
+/**
+ * @method static \Core\Database\QueryBuilder where(string $column, string $operator, mixed $value = null)
+ * @method static \Core\Database\QueryBuilder get()
+ * @method static \Core\Database\QueryBuilder first()
+ * @method static \Core\Database\QueryBuilder insert(array $data)
+ * @method static \Core\Database\QueryBuilder update(array $data)
+ */
 class Model
 {
   protected static $db;
@@ -24,6 +31,14 @@ class Model
     if (method_exists($instance, $method)) {
       return call_user_func_array([$instance, $method], $args);
     }
+
+    $builder = new QueryBuilder();
+    $builder->table($instance->table);
+    $builder->setModel(static::class);
+
+    if (method_exists($builder, $method)) {
+      return call_user_func_array([$builder, $method], $args);
+    }
   }
 
   public function __get($name)
@@ -38,75 +53,35 @@ class Model
 
   protected function find($id)
   {
-
-    $stmt = self::$db->prepare("SELECT * FROM $this->table WHERE id = :id");
-    $stmt->execute(['id' => $id]);
-
-    $data = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$data) {
-      return null;
-    }
-
-    $model = new static();
-    $model->attribute = $data;
-    return $model;
-
+    return static::where('id', $id)->first();
   }
+
   protected function all()
   {
-    $stmt = self::$db->prepare("SELECT * FROM $this->table");
-    $stmt->execute();
-
-    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    $models = [];
-
-    foreach ($rows as $row) {
-      $model = new static();
-      $model->attributes = $row;
-      $models[] = $model;
-    }
-
-    return $models;
+    return static::get();
   }
 
   protected function create(array $data)
   {
-
     $values = array_intersect_key($data, array_flip($this->fillable));
-    $columns = implode(',', array_keys($values));
 
-    $placeholders = array_map(fn($col) => ":$col", array_keys($values));
-    $placeholderString = implode(',', $placeholders);
-
-    $stmt = self::$db->prepare("INSERT INTO $this->table ($columns) VALUES ($placeholderString)");
-
-    $stmt->execute($values);
+    static::insert($values);
 
     return $this->find(self::$db->lastInsertId());
   }
 
   protected function update(int $id, array $data)
   {
-
     $values = array_intersect_key($data, array_flip($this->fillable));
 
-    $placeholders = array_map(fn($col) => "$col=:$col", array_keys($values));
-    $placeholderString = implode(',', $placeholders);
-
-    $stmt = self::$db->prepare("UPDATE $this->table SET $placeholderString WHERE id = :id");
-
-    $values['id'] = $id;
-    $stmt->execute($values);
+    static::where('id', $id)->update($values);
 
     return $this->find($id);
   }
 
   protected function delete(int $id)
   {
-    $stmt = self::$db->prepare("DELETE FROM $this->table WHERE id = :id");
-
-    $stmt->execute(['id' => $id]);
+    return static::where('id', $id)->delete();
   }
 
   protected function hasMany(string $relatedModel, string $foreignKey)
