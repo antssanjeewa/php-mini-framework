@@ -2,11 +2,15 @@
 
 namespace Core\Database;
 
+use PDO;
+
 class Model
 {
   protected static $db;
   protected string $table;
   protected array $fillable;
+
+  protected array $attribute = [];
 
   public function __construct()
   {
@@ -22,20 +26,48 @@ class Model
     }
   }
 
+  public function __get($name)
+  {
+    return $this->attribute[$name] ?? null;
+  }
+
+  public function __set($name, $value)
+  {
+    $this->attribute[$name] = $value;
+  }
+
   protected function find($id)
   {
 
     $stmt = self::$db->prepare("SELECT * FROM $this->table WHERE id = :id");
     $stmt->execute(['id' => $id]);
 
-    return $stmt->fetch();
+    $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$data) {
+      return null;
+    }
+
+    $model = new static();
+    $model->attribute = $data;
+    return $model;
+
   }
   protected function all()
   {
     $stmt = self::$db->prepare("SELECT * FROM $this->table");
     $stmt->execute();
 
-    return $stmt->fetchAll();
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $models = [];
+
+    foreach ($rows as $row) {
+      $model = new static();
+      $model->attributes = $row;
+      $models[] = $model;
+    }
+
+    return $models;
   }
 
   protected function create(array $data)
@@ -50,6 +82,8 @@ class Model
     $stmt = self::$db->prepare("INSERT INTO $this->table ($columns) VALUES ($placeholderString)");
 
     $stmt->execute($values);
+
+    return $this->find(self::$db->lastInsertId());
   }
 
   protected function update(int $id, array $data)
@@ -64,6 +98,8 @@ class Model
 
     $values['id'] = $id;
     $stmt->execute($values);
+
+    return $this->find($id);
   }
 
   protected function delete(int $id)
@@ -71,5 +107,58 @@ class Model
     $stmt = self::$db->prepare("DELETE FROM $this->table WHERE id = :id");
 
     $stmt->execute(['id' => $id]);
+  }
+
+  protected function hasMany(string $relatedModel, string $foreignKey)
+  {
+    $instance = new $relatedModel();
+
+    $stmt = self::$db->prepare("SELECT * FROM $instance->table WHERE $foreignKey = :id");
+    $stmt->execute(['id' => $this->id]);
+
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $models = [];
+
+    foreach ($rows as $row) {
+      $model = new $relatedModel();
+      $model->attributes = $row;
+      $models[] = $model;
+    }
+
+    return $models;
+  }
+
+  protected function belongsTo(string $relatedModel, string $foreignId)
+  {
+    $instance = new $relatedModel();
+
+    $stmt = self::$db->prepare("SELECT * FROM $instance->table WHERE id = :id");
+    $stmt->execute(['id' => $foreignId]);
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$row) {
+      return null;
+    }
+
+    $instance->attributes = $row;
+    return $instance;
+  }
+
+  protected function hasOne(string $relatedModel, string $foreignKey)
+  {
+    $instance = new $relatedModel();
+
+    $stmt = self::$db->prepare("SELECT * FROM $instance->table WHERE $foreignKey = :id");
+    $stmt->execute(['id' => $this->id]);
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$row) {
+      return null;
+    }
+
+    $instance->attributes = $row;
+    return $instance;
   }
 }
